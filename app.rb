@@ -13,6 +13,6 @@ class App < Sinatra::Application
   end
 
   get "/" do
-    "Hello, world"
+    erb :index
   end
 end
