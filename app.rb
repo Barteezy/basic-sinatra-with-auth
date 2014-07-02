@@ -13,6 +13,17 @@ class App < Sinatra::Application
   end
 
   get "/" do
-    erb :index
+    erb :index, :locals => {:users => @users}
+  end
+
+  get "/register" do
+    erb :register
+  end
+
+  post "/register" do
+    username = params[:username]
+    password = params[:password]
+    @users.insert(@user, :username => username, :password => password)
+    redirect "/"
   end
 end
