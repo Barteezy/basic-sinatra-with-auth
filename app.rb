@@ -10,10 +10,20 @@ class App < Sinatra::Application
   def initialize
     super
     @user_database = UserDatabase.new
+    @user = {}
   end
 
+  helpers do
+    def flash_types
+      [:success, :notice, :warning, :error]
+    end
+  end
+
+
   get "/" do
-    erb :index, :locals => {:users => @users}
+    @user[:id] = session[:user_id]
+    #user_database.find(id)
+    erb :index, :locals => {username => user[:username]}
   end
 
   get "/register" do
@@ -23,7 +33,14 @@ class App < Sinatra::Application
   post "/register" do
     username = params[:username]
     password = params[:password]
-    @users.insert(@user, :username => username, :password => password)
+    user = @user_database.insert({:username => username, :password => password})
+    session[:user_id] = user[:id]
+    flash[:success] = 'Thank you for registering'
     redirect "/"
+  end
+
+  post "/" do
+     @user.delete
+     erb :index, :locals => {:user => @user}
   end
 end
