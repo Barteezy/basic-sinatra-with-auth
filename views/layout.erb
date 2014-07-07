@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Authentication</title>
+</head>
+<body>
+<% if flash[:notice] %>
+    <span style="color: green"><%= flash[:notice] %></span>
+<% end %>
+<%= yield %>
+</body>
+</html>
