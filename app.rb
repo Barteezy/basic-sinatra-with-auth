@@ -10,37 +10,48 @@ class App < Sinatra::Application
   def initialize
     super
     @user_database = UserDatabase.new
-    @user = {}
   end
 
-  helpers do
-    def flash_types
-      [:success, :notice, :warning, :error]
+  get "/" do
+    if current_user
+      erb :signed_in, locals: {username: current_user[:username]}
+    else
+      erb :index
     end
   end
 
-
-  get "/" do
-    @user[:id] = session[:user_id]
-    #user_database.find(id)
-    erb :index, :locals => {username => user[:username]}
+  get "/registration/new" do
+    erb :"/registration/new"
   end
 
-  get "/register" do
-    erb :register
-  end
-
-  post "/register" do
-    username = params[:username]
-    password = params[:password]
-    user = @user_database.insert({:username => username, :password => password})
-    session[:user_id] = user[:id]
-    flash[:success] = 'Thank you for registering'
+  post "/registration" do
+    @user_database.insert(username: params[:username], password: params[:password])
+    flash[:notice] = "Thanks for registering"
     redirect "/"
   end
 
-  post "/" do
-     @user.delete
-     erb :index, :locals => {:user => @user}
+  post "/session" do
+    user = find_user(params)
+    session[:user_id] = user[:id] if user
+    redirect "/"
+  end
+
+  get "/logout" do
+    session.delete(:user_id)
+    flash[:notice] = "You are now signed out"
+    redirect "/"
+  end
+
+
+  private
+
+  def find_user(params)
+    @user_database.all.select { |user| user[:username] == params[:username] && user[:password] == params[:password] }.first
+  end
+
+  def current_user
+    if session[:user_id]
+      @user_database.find(session[:user_id])
+    end
   end
 end
